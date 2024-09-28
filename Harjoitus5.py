@@ -25,6 +25,7 @@ except Exception as e:
     root.destroy()
     exit()
 
+# Paikat ikkunassa
 canvas = tk.Canvas(root, width=1000, height=500)
 canvas.pack()
 canvas.create_image(100, 200, image=saari_img)
@@ -109,12 +110,13 @@ def laheta_apina_uimaan(lahdettaja, matka_label):
             uitu_matka = askel + 1
             matka_label.config(text=f"{matka_label.cget('text').split(':')[0]}: {uitu_matka} km")
 
-            if askel == 0 or askel == askeleet - 1:
+            if askel % 5 == 0:
                 winsound.PlaySound("swim_sound.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
 
             root.after(200, ui_askel, askel + 1)
         else:
             matka_label.config(text=f"{matka_label.cget('text').split(':')[0]}: Perillä!")
+            winsound.PlaySound("mantereella.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)  # Apina on perillä
             sana = random.choice(sanat)  # Valitaan satunnainen sana
             apina_data['saapuneet_sanat'].add(sana)
             sanat.remove(sana)  # Poistetaan valittu sana käytettävistä sanoista
@@ -184,6 +186,7 @@ def laheta_10_apinaa(lahdettaja):
     apinat[lahdettaja]['kulku'] = True
     seuraava_apina(10)
 
+# Ernestin napit
 ernesti_frame = tk.Frame(root)
 ernesti_frame.pack(side=tk.LEFT, padx=20)
 ernesti_1_apina_button = tk.Button(ernesti_frame, text="Ernesti lähettää 1 apinan uimaan", command=lambda: laheta_apina_uimaan('ernesti', ernesti_matka_label))
@@ -191,6 +194,7 @@ ernesti_1_apina_button.pack(pady=5)
 ernesti_10_apinaa_button = tk.Button(ernesti_frame, text="Ernesti lähettää 10 apinaa uimaan", command=lambda: laheta_10_apinaa('ernesti'))
 ernesti_10_apinaa_button.pack(pady=5)
 
+# Kernestin napit
 kernesti_frame = tk.Frame(root)
 kernesti_frame.pack(side=tk.RIGHT, padx=20)
 kernesti_1_apina_button = tk.Button(kernesti_frame, text="Kernesti lähettää 1 apinan uimaan", command=lambda: laheta_apina_uimaan('kernesti', kernesti_matka_label))
@@ -198,6 +202,7 @@ kernesti_1_apina_button.pack(pady=5)
 kernesti_10_apinaa_button = tk.Button(kernesti_frame, text="Kernesti lähettää 10 apinaa uimaan", command=lambda: laheta_10_apinaa('kernesti'))
 kernesti_10_apinaa_button.pack(pady=5)
 
+# Juhlien laskenta nappi
 laske_juhlat_button = tk.Button(text="Laske juhlat", command=laske_juhlat)
 laske_juhlat_button.pack(pady=5)
 
