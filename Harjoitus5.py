@@ -207,3 +207,5 @@ laske_juhlat_button = tk.Button(text="Laske juhlat", command=laske_juhlat)
 laske_juhlat_button.pack(pady=5)
 
 root.mainloop()
+
+# Koodin kanssa ollaan apuna käytetty ChatGPT, varsinkin säikeitten optimoimisessa että ohjelma pyörii oikein.
