@@ -56,31 +56,33 @@ pohteri = canvas.create_image(*pohteri_pos, image=pohteri_img)
 eteteri = canvas.create_image(*eteteri_pos, image=eteteri_img)
 
 evakuointilaiva_lahtenyt = False
-saapuneet_apinat = 0  # Laskuri saapuneille apinoille
+saapuneet_apinat = 0  
 
+# Pohteri ja Eteteri tarkkailee erikseen Ernestin ja Kernestin sanoja
 def satamavahdit(apina_data, lahdettaja):
     global evakuointilaiva_lahtenyt
-    global saapuneet_apinat  # Käytetään globaalina
 
-    while not evakuointilaiva_lahtenyt:
+    while not evakuointilaiva_lahtenyt:  # Tarkkaillaan vain, jos laiva ei ole lähtenyt
         if len(apina_data['saapuneet_sanat']) >= 10:
-            if lahdettaja == 'ernesti':
-                print("Pohteri: Evakuointilaiva lähtee pohjoispäästä!")
-                laiva_uimaan('ernesti')
-            else:
-                print("Eteteri: Evakuointilaiva lähtee eteläpäästä!")
-                laiva_uimaan('kernesti')
-            evakuointilaiva_lahtenyt = True
-        threading.Event().wait(1)
+            if not evakuointilaiva_lahtenyt:  
+                if lahdettaja == 'ernesti':
+                    print("Pohteri: Evakuointilaiva lähtee pohjoispäästä!")
+                    laiva_uimaan('ernesti')
+                else:
+                    print("Eteteri: Evakuointilaiva lähtee eteläpäästä!")
+                    laiva_uimaan('kernesti')
+                evakuointilaiva_lahtenyt = True  # Merkitään, että laiva on lähtenyt
+            break  # Lopetetaan tarkkailu, kun ensimmäinen laiva lähtee
+        threading.Event().wait(1)  # Odotetaan ennen seuraavaa tarkistusta
 
-#Apinan lähettäminen
+
+# Apinan lähettäminen uimaan
 def laheta_apina_uimaan(lahdettaja, matka_label):
     global ernesti_sanat, kernesti_sanat
 
     apina_data = apinat[lahdettaja]
     sanat = ernesti_sanat if lahdettaja == 'ernesti' else kernesti_sanat
 
-    # Tarkista, että sanoja on vielä käytettävissä
     if not sanat:
         return
 
@@ -93,8 +95,8 @@ def laheta_apina_uimaan(lahdettaja, matka_label):
     def ui_askel(askel):
         nonlocal apina_x
         if askel < askeleet:
-            # Testaa haihyökkäys jokaisella askeleella
-            if np.random.random() < 0.00:  # 1% mahdollisuus hyökätä
+            # Testataan hain hyökkäys jokaiselta askeleelta
+            if np.random.random() < 0.01:  # Hain hyökkäysprosentti
                 canvas.coords(apina_ref, -100, -100)
                 canvas.create_image(apina_x, apina_y, image=shark_img)
                 winsound.PlaySound("shark_sound.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
@@ -113,19 +115,17 @@ def laheta_apina_uimaan(lahdettaja, matka_label):
             root.after(200, ui_askel, askel + 1)
         else:
             matka_label.config(text=f"{matka_label.cget('text').split(':')[0]}: Perillä!")
-            sana = random.choice(sanat)  # Valitse satunnainen sana
+            sana = random.choice(sanat)  # Valitaan satunnainen sana
             apina_data['saapuneet_sanat'].add(sana)
-            sanat.remove(sana)  # Poista valittu sana käytettävistä sanoista
+            sanat.remove(sana)  # Poistetaan valittu sana käytettävistä sanoista
             print(f"{lahdettaja}: {sana}")
 
-            if saapuneet_apinat == 10:  # Tarkista, onko kaikki 10 apinaa saapunut
-                print("Laiva lähtee liikkeelle!")
-
-            # Suorita satamavahdit erikseen
-            threading.Thread(target=satamavahdit, args=(apinat[lahdettaja], lahdettaja)).start()
+            # Käynnistetään satamavahdit tarkkailemaan tämän apinan sanoja
+            threading.Thread(target=satamavahdit, args=(apina_data, lahdettaja)).start()
 
     ui_askel(0)
 
+# Laivan luonti mantereelle ja liike saarelle
 def laiva_uimaan(lahdettaja):
     laiva_ref = canvas.create_image(750, 150 if lahdettaja == 'ernesti' else 300, image=laiva_img)  # Eri korkeudet
     laiva_x = 750
@@ -153,6 +153,7 @@ def laiva_uimaan(lahdettaja):
     ui_askel(0)
 
 def laske_juhlat():
+    #Tässä osiossa lasketaan apinoiden määrä molemmilta ja sillä lasketaan keittoon käytetty mustapippurin määrä ja juhlien vierailijoitten määrä
     ernesti_apinoita = len(apinat['ernesti']['saapuneet_sanat'])
     kernesti_apinoita = len(apinat['kernesti']['saapuneet_sanat'])
 
